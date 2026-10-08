@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101014" />
+    <meta
+      name="description"
+      content="Your personal midnight anime library. Discover anime, track your journey, and find your next obsession."
+    />
+    <title>YomiList — Your next chapter</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header class="header">
+      <a class="brand" href="#home" aria-label="YomiList home"
+        ><span class="brand-mark">夜</span>yomi<span class="brand-light"
+          >list</span
+        ><span class="brand-dot"></span
+      ></a>
+      <nav aria-label="Main navigation">
+        <a href="#home" data-page="home">Home</a
+        ><a href="#library" data-page="library"
+          >My Anime <span id="nav-count">0</span></a
+        ><a href="#discover" data-page="discover">Discover</a>
+      </nav>
+      <form id="search-form" role="search">
+        <span aria-hidden="true">⌕</span
+        ><input
+          id="search-input"
+          type="search"
+          placeholder="Find your next anime…"
+          aria-label="Search anime"
+          autocomplete="off"
+        /><kbd>/</kbd>
+      </form>
+      <button
+        class="avatar"
+        id="profile-button"
+        aria-label="View your library statistics"
+      >
+        Y
+      </button>
+    </header>
+    <main>
+      <section id="home-page" class="page">
+        <div class="welcome">
+          <div>
+            <p class="eyebrow">YOUR OWN LITTLE UNIVERSE</p>
+            <h1>Every story starts here<span>.</span></h1>
+          </div>
+          <p class="welcome-note">
+            Track your journey. Find your next obsession.
+          </p>
+        </div>
+        <section class="hero" id="hero" aria-label="Featured anime">
+          <div class="hero-art" id="hero-art"></div>
+          <div class="hero-content">
+            <div class="hero-label">
+              <span class="live-dot"></span> THE SPOTLIGHT
+              <span id="hero-season"></span>
+            </div>
+            <h2 id="hero-title">Your next chapter<br />is waiting.</h2>
+            <p id="hero-description">
+              A world of unforgettable stories. Find the ones that stay with
+              you.
+            </p>
+            <div id="hero-meta" class="hero-meta"></div>
+            <div class="hero-actions">
+              <button class="primary" id="hero-open">
+                Explore anime <span>↗</span></button
+              ><button class="glass-button" id="hero-add" hidden>
+                ＋ My list
+              </button>
+            </div>
+          </div>
+          <div class="hero-bottom">
+            <span>新しい物語を見つけよう</span
+            ><span>YOUR MIDNIGHT ANIME LIBRARY</span>
+          </div>
+        </section>
+        <section
+          class="stats-strip"
+          aria-label="Library statistics"
+          id="stats-strip"
+        ></section>
+        <div class="home-columns">
+          <div class="home-sections">
+            <section class="shelf">
+              <div class="section-heading">
+                <div>
+                  <span class="eyebrow">PICK UP WHERE YOU LEFT OFF</span>
+                  <h2>
+                    Continue watching
+                    <span id="watching-count" class="count-pill">0</span>
+                  </h2>
+                </div>
+                <a href="#library">View library ↗</a>
+              </div>
+              <div id="continue-grid" class="card-grid compact-grid"></div>
+            </section>
+            <section class="shelf">
+              <div class="section-heading">
+                <div>
+                  <span class="eyebrow">THE NEXT CHAPTER</span>
+                  <h2>Plan to watch</h2>
+                </div>
+                <a href="#library">View all ↗</a>
+              </div>
+              <div id="planned-grid" class="card-grid compact-grid"></div>
+            </section>
+          </div>
+          <aside>
+            <section class="random-panel">
+              <div class="dice-art" aria-hidden="true">⚄</div>
+              <span class="eyebrow">LET FATE DECIDE</span>
+              <h2>Too many anime.<br />One perfect pick.</h2>
+              <p>Let a little randomness lead you to your next great story.</p>
+              <button id="random-open" class="primary">
+                What should I watch? <span>↗</span></button
+              ><small>From your watching & planned anime</small>
+            </section>
+            <section class="journal-panel">
+              <span class="eyebrow">YOUR ANIME JOURNEY</span>
+              <h3>A story in numbers</h3>
+              <div id="journey-stats"></div>
+              <div class="completion-track">
+                <span id="completion-bar"></span>
+              </div>
+              <p id="completion-label"></p>
+            </section>
+          </aside>
+        </div>
+        <section class="shelf">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">FRESH ON YOUR SHELF</span>
+              <h2>Recently added</h2>
+            </div>
+            <a href="#library">View library ↗</a>
+          </div>
+          <div id="recent-grid" class="card-grid"></div>
+        </section>
+        <section class="shelf">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">A WORLD BEYOND YOUR WATCHLIST</span>
+              <h2>Discover something extraordinary</h2>
+            </div>
+            <a href="#discover">Explore all ↗</a>
+          </div>
+          <div id="home-discover-grid" class="card-grid"></div>
+        </section>
+      </section>
+      <section id="library-page" class="page" hidden>
+        <div class="page-heading">
+          <p class="eyebrow">COLLECT STORIES, NOT JUST TITLES</p>
+          <h1>My anime<span>.</span></h1>
+          <p>Your world of stories, all in one place.</p>
+        </div>
+        <div class="library-toolbar">
+          <div
+            id="status-filters"
+            class="filter-tabs"
+            aria-label="Filter library"
+          ></div>
+          <label class="sort-label"
+            >Sort by
+            <select id="sort-select">
+              <option value="recent">Recently added</option>
+              <option value="title">Title</option>
+              <option value="rating">Personal rating</option>
+              <option value="score">AniList score</option>
+              <option value="progress">Progress</option>
+              <option value="year">Year</option>
+            </select></label
+          >
+        </div>
+        <div id="library-grid" class="card-grid"></div>
+      </section>
+      <section id="discover-page" class="page" hidden>
+        <div class="page-heading">
+          <p class="eyebrow">FIND YOUR NEXT OBSESSION</p>
+          <h1>Beyond your world<span>.</span></h1>
+          <p id="discover-subtitle">
+            The stories everyone is talking about. Your next favorite is here.
+          </p>
+        </div>
+        <div class="discover-toolbar">
+          <div class="filter-tabs" id="discover-tabs">
+            <button data-sort="TRENDING_DESC" class="active">
+              Trending now</button
+            ><button data-sort="POPULARITY_DESC">All-time popular</button
+            ><button data-sort="SCORE_DESC">Top rated</button>
+          </div>
+          <button id="clear-search" class="text-button" hidden>
+            Clear search ×
+          </button>
+        </div>
+        <div id="discover-grid" class="card-grid"></div>
+        <div class="load-more">
+          <button id="load-more" class="secondary" hidden>
+            Load more anime ↓
+          </button>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <a class="brand" href="#home">夜 <span>yomilist</span></a>
+      <p>Every anime. A new world.</p>
+      <a href="https://anilist.co" target="_blank" rel="noopener"
+        >Anime data by AniList ↗</a
+      >
+    </footer>
+    <dialog id="detail-dialog" class="detail-dialog">
+      <button
+        class="close-button"
+        data-close="detail-dialog"
+        aria-label="Close anime details"
+      >
+        ×
+      </button>
+      <div id="detail-content"></div>
+    </dialog>
+    <dialog id="random-dialog" class="random-dialog">
+      <button
+        class="close-button"
+        data-close="random-dialog"
+        aria-label="Close random picker"
+      >
+        ×</button
+      ><span class="eyebrow">A LITTLE SERENDIPITY</span>
+      <h2>Your next story awaits.</h2>
+      <p>Choose the shelves fate can explore.</p>
+      <div class="random-options">
+        <label
+          ><input type="checkbox" id="random-watching" checked />
+          Watching</label
+        ><label
+          ><input type="checkbox" id="random-planned" checked /> Plan to
+          Watch</label
+        >
+      </div>
+      <div id="random-result"></div>
+      <button class="primary" id="random-roll">Find my next anime ⚄</button>
+    </dialog>
+    <dialog id="confirm-dialog" class="confirm-dialog">
+      <h2>Remove this anime?</h2>
+      <p id="confirm-description"></p>
+      <div class="dialog-actions">
+        <button class="secondary" data-close="confirm-dialog">Keep anime</button
+        ><button class="danger" id="confirm-remove">Remove from library</button>
+      </div>
+    </dialog>
+    <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+  </body>
+</html>
