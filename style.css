@@ -1277,3 +1277,30 @@ input[type="checkbox"] {
     scroll-behavior: auto !important;
   }
 }
+
+/* Direct episode entry shares the compact progress controls. */
+.episode-input {
+  width: 4.5ch;
+  min-width: 38px;
+  max-width: 75px;
+  padding: 4px 3px;
+  border: 1px solid #504461;
+  border-radius: 5px;
+  background: #211e2b;
+  color: var(--text);
+  text-align: center;
+  font-size: inherit;
+  font-weight: 600;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.episode-input::-webkit-inner-spin-button,
+.episode-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.detail-progress .episode-input {
+  width: 6ch;
+  font-size: 12px;
+  padding: 7px 4px;
+}

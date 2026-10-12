@@ -329,7 +329,7 @@ function animeCard(anime) {
     </button>
     <button class="card-title" data-detail="${anime.id}">${title}</button>
     <p class="card-meta">${anime.seasonYear || "TBA"} · ${animeFormat(anime.format)} · ${anime.episodes ? `${anime.episodes} episodes` : "Episodes TBA"}${saved?.personalRating ? ` · ♥ ${saved.personalRating}/10` : ""}</p>
-    ${saved ? `<div class="progress-row"><span>${saved.watchedEpisodes} / ${anime.episodes || "?"} eps</span><button data-progress="${anime.id}" data-change="-1" aria-label="Subtract an episode for ${title}" ${saved.watchedEpisodes === 0 ? "disabled" : ""}>−</button><button data-progress="${anime.id}" data-change="1" aria-label="Add an episode for ${title}" ${anime.episodes && saved.watchedEpisodes >= anime.episodes ? "disabled" : ""}>＋</button></div><div class="progress-track"><span style="width:${progress}%"></span></div>` : `<p class="card-genres">${escapeHtml((anime.genres || []).slice(0, 2).join(" · "))}</p>`}
+    ${saved ? `<div class="progress-row"><span>${episodeProgressInput(saved)} / ${anime.episodes || "?"} eps</span><button data-progress="${anime.id}" data-change="-1" aria-label="Subtract an episode for ${title}" ${saved.watchedEpisodes === 0 ? "disabled" : ""}>−</button><button data-progress="${anime.id}" data-change="1" aria-label="Add an episode for ${title}" ${anime.episodes && saved.watchedEpisodes >= anime.episodes ? "disabled" : ""}>＋</button></div><div class="progress-track"><span style="width:${progress}%"></span></div>` : `<p class="card-genres">${escapeHtml((anime.genres || []).slice(0, 2).join(" · "))}</p>`}
   </article>`;
 }
 
@@ -381,23 +381,33 @@ function removeAnimeFromLibrary(id) {
   refreshLibraryViews();
   showToast("Anime removed from your library.");
 }
+// Both direct entry and +/- buttons use the same bounds and completion rules.
+function episodeProgressInput(anime) {
+  return `<input class="episode-input" type="number" inputmode="numeric" min="0" ${anime.episodes ? `max="${anime.episodes}"` : ''} step="1" value="${anime.watchedEpisodes}" data-episode-id="${anime.id}" aria-label="Watched episodes for ${escapeHtml(animeTitle(anime))}">`;
+}
 function updateEpisodeProgress(id, change) {
+  const anime = library.find((item) => item.id === id);
+  if (anime) setEpisodeProgress(id, anime.watchedEpisodes + change);
+}
+function setEpisodeProgress(id, value) {
   const anime = library.find((item) => item.id === id);
   if (!anime) return;
   const previous = anime.watchedEpisodes;
+  // An empty or invalid entry restores the saved value instead of erasing progress.
+  if (String(value).trim() === '' || !Number.isFinite(Number(value))) {
+    refreshLibraryViews();
+    return;
+  }
   anime.watchedEpisodes = Math.min(
-    Math.max(0, previous + change),
-    anime.episodes || Infinity,
+    Math.max(0, Math.floor(Number(value))),
+    anime.episodes || Number.MAX_SAFE_INTEGER,
   );
-  if (
-    anime.episodes &&
-    anime.watchedEpisodes === anime.episodes &&
-    previous < anime.episodes
-  ) {
+  if (anime.episodes && anime.watchedEpisodes === anime.episodes && previous < anime.episodes) {
     anime.status = "Completed";
     showToast("All episodes watched. Story completed!");
-  } else if (change < 0 && anime.status === "Completed")
+  } else if (anime.watchedEpisodes < previous && anime.status === "Completed") {
     anime.status = "Watching";
+  }
   saveLibrary();
   refreshLibraryViews();
 }
@@ -634,7 +644,7 @@ function renderAnimeDetails(anime) {
     : "";
 }
 function renderListControls(anime) {
-  return `<div class="list-controls"><div class="control-fields"><div><label for="detail-status">Your status</label><select id="detail-status" data-status-id="${anime.id}">${STATUSES.map((status) => `<option ${status === anime.status ? "selected" : ""}>${status}</option>`).join("")}</select></div><div><label for="detail-rating">Personal rating</label><select id="detail-rating" data-rating-id="${anime.id}"><option value="0">Not rated</option>${Array.from({ length: 10 }, (_, index) => `<option value="${index + 1}" ${anime.personalRating === index + 1 ? "selected" : ""}>${index + 1} / 10</option>`).join("")}</select></div></div><div class="detail-progress"><button data-progress="${anime.id}" data-change="-1" aria-label="Subtract one watched episode" ${anime.watchedEpisodes === 0 ? "disabled" : ""}>−</button><strong>${anime.watchedEpisodes} / ${anime.episodes || "?"} episodes</strong><button data-progress="${anime.id}" data-change="1" aria-label="Add one watched episode" ${anime.episodes && anime.watchedEpisodes >= anime.episodes ? "disabled" : ""}>＋</button></div><button class="remove-button" data-remove="${anime.id}">Remove from my library</button></div>`;
+  return `<div class="list-controls"><div class="control-fields"><div><label for="detail-status">Your status</label><select id="detail-status" data-status-id="${anime.id}">${STATUSES.map((status) => `<option ${status === anime.status ? "selected" : ""}>${status}</option>`).join("")}</select></div><div><label for="detail-rating">Personal rating</label><select id="detail-rating" data-rating-id="${anime.id}"><option value="0">Not rated</option>${Array.from({ length: 10 }, (_, index) => `<option value="${index + 1}" ${anime.personalRating === index + 1 ? "selected" : ""}>${index + 1} / 10</option>`).join("")}</select></div></div><div class="detail-progress"><button data-progress="${anime.id}" data-change="-1" aria-label="Subtract one watched episode" ${anime.watchedEpisodes === 0 ? "disabled" : ""}>−</button><strong>${episodeProgressInput(anime)} / ${anime.episodes || "?"} episodes</strong><button data-progress="${anime.id}" data-change="1" aria-label="Add one watched episode" ${anime.episodes && anime.watchedEpisodes >= anime.episodes ? "disabled" : ""}>＋</button></div><button class="remove-button" data-remove="${anime.id}">Remove from my library</button></div>`;
 }
 
 // Random selection only uses the user's eligible saved anime.
@@ -762,6 +772,9 @@ document.addEventListener("click", (event) => {
 });
 document.addEventListener("change", (event) => {
   const control = event.target;
+  if (control.dataset.episodeId) {
+    setEpisodeProgress(Number(control.dataset.episodeId), control.value);
+  }
   if (control.dataset.statusId) {
     updateAnimeStatus(Number(control.dataset.statusId), control.value);
     restoreControlFocus("data-status-id", control.dataset.statusId);
@@ -853,6 +866,14 @@ document.addEventListener(
   true,
 );
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && event.target.matches("[data-episode-id]")) {
+    event.preventDefault();
+    const input = event.target;
+    const shelfId = input.closest("[id]")?.id;
+    const id = input.dataset.episodeId;
+    setEpisodeProgress(Number(id), input.value);
+    document.getElementById(shelfId)?.querySelector(`[data-episode-id="${id}"]`)?.focus();
+  }
   if (
     event.key === "/" &&
     !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName) &&
